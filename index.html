@@ -1078,14 +1078,14 @@ img {
                             <img src="img/avatar/97.png">
                             <p>メ乖乖女ソ(3453674)：为了躲开所有结局的可能，你连开始都直接按了暂停键</p>
                         </div>
-                        <ul class="qq-im-chat-msg-list">
+                        <ul class="qq-im-chat-msg-list" id="chat-list">
                             <li class="my">
                                 <p>痴情梦丶<span>20:37:01</span></p>
                                 <p>在吗？</p>
                             </li>
                             <li>
                                 <p>メ乖乖女ソ<span>20:37:08</span></p>
-                                <p>原来你也在网上冲浪啊~</p>
+                                <p>嗯，你说</p>
                             </li>
                         </ul>
                     </div>
@@ -1104,7 +1104,7 @@ img {
                     </div>
 
                     <!-- 聊天发送框 -->
-                    <textarea class="qq-im-chat-send"></textarea>
+                    <textarea class="qq-im-chat-send" id="chat-input"></textarea>
                 </div>
                 <div class="qq-im-btns">
                     <button class="qq-btn">聊天记录(H)</button>
@@ -1308,7 +1308,7 @@ img {
             <button id="qq-MobileMsgButton" title="发送手机消息" style="background-image: url('img/MobileMsgButton.png')"></button>
             <button id="qq-GameButton" title="QQ游戏" style="background-image: url('img/GameButton.png')" onclick="window.open('https://game.qq.com/')"></button>
             <button id="qq-TTButton" title="腾讯TT浏览器" style="background-image: url('img/TTButton.png')" onclick="window.open('https://browser.qq.com/')"></button>
-            <button id="qq-ChatRoomButton" title="进入聊天室" style="background-image: url('img/ChatRoomButton.png')"></button>
+            <button id="qq-ChatRoomButton" title="进入聊天室" style="background-image: url('img/ChatRoomButton.png')" hidden></button>
             <button id="qq-QQHome" title="QQ空间" style="background-image: url('img/QQHome.png')" onclick="window.open('https://qzone.qq.com/')"></button>
             <button id="qq-QQMusicButton" title="QQ音乐" style="background-image: url('img/QQMusicButton.png')" onclick="window.open('https://y.qq.com/')"></button>
             <button id="qq-QQTVButton" title="网络电视(QQLive)" style="background-image: url('img/QQTVButton.png')" onclick="window.open('https://v.qq.com/')"></button>
@@ -1405,10 +1405,58 @@ img {
 <script>
 const playAudio = url => new Audio(url).play().catch(e => console.error('播放失败:', e));
 
+const simulageMsgs = [
+    '时光匆匆，那些篇章再也续不上',
+    '好久不见，你还好吗？',
+    '回不去的是青春，等不到的是旧人',
+    '欢迎回到 2006 年',
+    '你好，我是メ乖乖女ソ，很高兴认识你 :)',
+    'Vae 的新歌《玫瑰花的葬礼》你听了吗',
+    '哈哈哈，真有意思',
+    '你有黄钻吗？帮我装修一下空间吧^_^',
+    "我也这么觉得",
+    "真的吗？",
+];
+
+// 添加消息到聊天窗口
+function addChatMessage(text, isUser = false) {
+    const chatList = document.getElementById('chat-list');
+    if (!chatList) return;
+    
+    const li = document.createElement('li');
+    li.className = isUser ? 'my' : '';
+    
+    const now = new Date();
+    const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+    
+    li.innerHTML = `
+        <p>${isUser ? '痴情梦丶' : 'メ乖乖女ソ'}<span>${timeStr}</span></p>
+        <p>${text}</p>
+    `;
+    
+    chatList.appendChild(li);
+    chatList.scrollTop = chatList.scrollHeight;
+    
+    // 播放消息音效
+    if (!isUser) {
+        playAudio('sound/msg.mp3');
+    }
+}
+
 document.addEventListener('DOMContentLoaded',  () => {
 
     document.getElementById('btn-send-msg').onclick = () => {
-        playAudio('sound/msg.mp3');
+        const input = document.getElementById('chat-input');
+        const message = input.value;
+        if (message.trim() === '') return;
+
+        addChatMessage(message, true);
+        input.value = '';
+
+        // 模拟回复消息
+        setTimeout(() => {
+            addChatMessage(simulageMsgs[Math.floor(Math.random() * simulageMsgs.length)], false);
+        }, Math.floor(Math.random() * 1500 + 500));
     };
 
     document.getElementById('qq-MsgManagerButton').onclick = () => {
@@ -1427,7 +1475,7 @@ document.addEventListener('DOMContentLoaded',  () => {
         playAudio('sound/call.mp3');
     };
 
-    playAudio('sound/msg.mp3');
+    playAudio('sound/system.mp3');
 
     /* 拖拽移动窗口 */ 
     document.querySelectorAll('.drag-parent').forEach(parent  => {
