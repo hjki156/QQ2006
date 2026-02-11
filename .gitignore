@@ -1,2 +1,22 @@
+# 依赖
+node_modules/
+
+# 构建产物
+dist/
+
+# 环境变量
+.env
+.env.local
+
 # 禁用本地配置文件
 src/config.js
+
+# 测试文件
+*test*
+
+# 包管理
+bun.lock
+package-lock.json
+
+/node_modules
+/dist

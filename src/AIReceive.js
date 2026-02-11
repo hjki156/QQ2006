@@ -1,10 +1,10 @@
-const aiReceive = (function() {
+const AIReceive = (function() {
 
 const isFunction = e => typeof e === 'function' 
 
-function generateBody(message) {
+function generateBody(message, {thinking} = {}) {
     return {
-        model: API_ENTRYPOINT,
+        model: API_MODEL,
         messages: [
             {
                 role:    'system',
@@ -16,6 +16,9 @@ function generateBody(message) {
             },
         ],
         stream: true,
+        thinking: {
+            type: thinking? "enabled": "disabled"
+        },
     }
 }
 
@@ -27,17 +30,20 @@ function generateBody(message) {
  * @param {(line: string) => void} options.onChunk 生命周期函数,读取一行时
  * @param {() => void?}            options.onComplete 生命周期函数,完成时
  * @param {() => void?}            options.onError 生命周期函数,出错时
+ * @param {boolean}                options.thinking 是否思考
  */
 function aiReceive(message, {
     onStart,
     onChunk,
     onComplete,
     onError,
+    thinking = true,
 } = {}) {
     try {
         if (!message) throw new Error('message is empty')
         fetch(API_ENTRYPOINT, {
-            body: JSON.stringify(generateBody(message)),
+            method: 'POST',
+            body: JSON.stringify(generateBody(message, {thinking})),
             headers: {
                 'Content-Type' : 'application/json',
                 'Authorization': 'Bearer ' + API_KEY
@@ -77,5 +83,25 @@ function aiReceive(message, {
     }
 }
 
-return aiReceive
+/**
+ * 
+ * @param {string} line
+ */
+function formatSSE(line) {
+    try {
+        line = line.slice(5).trim()
+        if (line === '[DONE]') return null
+        let data = JSON.parse(line)
+        return data.choices[0].delta
+    } catch (e) {
+        console.error(e)
+        return null
+    }
+    
+}
+
+return {
+    receive: aiReceive,
+    format: formatSSE
+}
 })()
